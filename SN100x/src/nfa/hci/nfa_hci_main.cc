@@ -281,11 +281,8 @@ void nfa_hci_ee_info_cback(tNFA_EE_DISC_STS status) {
                           << StringPrintf("NFCEE_HCI_NOTIFY_ALL_PIPE_CLEARED () handling pending NFCEE_UNRECOVERABLE_ERRROR");
                       DLOG_IF(INFO, nfc_debug_enabled) << StringPrintf("resetting 11");
                       nfa_hciu_clear_host_resetting(nfa_hci_cb.curr_nfcee, NFCEE_REINIT);
-                      if (nfa_hciu_check_host_resetting(nfa_hci_cb.curr_nfcee,
-                              NFCEE_UNRECOVERABLE_ERRROR)) {
-                        nfa_hciu_clear_host_resetting(nfa_hci_cb.curr_nfcee,
-                                 NFCEE_UNRECOVERABLE_ERRROR);
-                      }
+                      nfa_hciu_check_n_clear_host_resetting(
+                          nfa_hci_cb.curr_nfcee, NFCEE_UNRECOVERABLE_ERRROR);
                       nfa_hci_cb.next_nfcee_idx += 1;
                     }
                     nfa_hciu_send_get_param_cmd(NFA_HCI_ADMIN_PIPE, NFA_HCI_HOST_LIST_INDEX);
@@ -296,12 +293,9 @@ void nfa_hci_ee_info_cback(tNFA_EE_DISC_STS status) {
                     }
                     break;
                  } else if (nfa_hci_cb.reset_host[xx].reset_cfg & NFCEE_REINIT) {
-                     nfa_hciu_clear_host_resetting(nfa_hci_cb.curr_nfcee, NFCEE_REINIT);
-                     if (nfa_hciu_check_host_resetting(nfa_hci_cb.curr_nfcee,
-                             NFCEE_UNRECOVERABLE_ERRROR)) {
-                       nfa_hciu_clear_host_resetting(nfa_hci_cb.curr_nfcee,
-                                NFCEE_UNRECOVERABLE_ERRROR);
-                     }
+                    nfa_hciu_clear_host_resetting(nfa_hci_cb.curr_nfcee, NFCEE_REINIT);
+                    nfa_hciu_check_n_clear_host_resetting(
+                        nfa_hci_cb.curr_nfcee, NFCEE_UNRECOVERABLE_ERRROR);
 
                      nfa_hci_cb.ee_info[nfa_hci_cb.next_nfcee_idx].hci_enable_state = NFA_HCI_FL_EE_ENABLED;
 
@@ -390,10 +384,7 @@ void nfa_hci_ee_info_cback(tNFA_EE_DISC_STS status) {
                 if (nfa_hciu_find_dyn_apdu_pipe_for_host (nfa_ee_cb.ecb[ee_entry_index].nfcee_id) == nullptr)
                 {
                   nfa_hci_cb.curr_nfcee = nfa_ee_cb.ecb[ee_entry_index].nfcee_id;
-                  if ((nfa_ee_cb.ecb[ee_entry_index].nfcee_id ==
-                           NFA_HCI_FIRST_PROP_HOST ||
-                       nfa_ee_cb.ecb[ee_entry_index].nfcee_id ==
-                           NFA_HCI_EUICC_HOST) &&
+                  if (IS_PROP_HOST(nfa_ee_cb.ecb[ee_entry_index].nfcee_id) &&
                       nfa_hci_cb.se_apdu_gate_support) {
                     NFC_NfceePLConfig(nfa_ee_cb.ecb[ee_entry_index].nfcee_id, 0x03);
                     nfa_hciu_add_host_resetting(nfa_ee_cb.ecb[ee_entry_index].nfcee_id, NFCEE_INIT_COMPLETED);
@@ -407,8 +398,10 @@ void nfa_hci_ee_info_cback(tNFA_EE_DISC_STS status) {
                      * LMRT & Restart RF Discovery.  */
                     tNFA_HCI_EVT_DATA evt_data;
                     evt_data.init_completed.status = NFA_STATUS_OK;
-                    nfa_hciu_send_to_all_apps(NFA_HCI_INIT_COMPLETED,
+                    if ((nfa_ee_cb.ee_flags & NFA_EE_FLAG_RECOVERY) == NFA_EE_FLAG_RECOVERY) {
+                        nfa_hciu_send_to_all_apps(NFA_HCI_INIT_COMPLETED,
                                               &evt_data);
+                    }
                   }
               }
             }
@@ -416,11 +409,8 @@ void nfa_hci_ee_info_cback(tNFA_EE_DISC_STS status) {
             {
               if (nfa_hciu_find_dyn_apdu_pipe_for_host(
                       nfa_ee_cb.ecb[ee_entry_index].nfcee_id) == nullptr &&
-                  (nfa_ee_cb.ecb[ee_entry_index].nfcee_id ==
-                       NFA_HCI_FIRST_PROP_HOST ||
-                   nfa_ee_cb.ecb[ee_entry_index].nfcee_id ==
-                       NFA_HCI_EUICC_HOST) &&
-                  nfa_hci_cb.se_apdu_gate_support) {
+                      IS_PROP_HOST(nfa_ee_cb.ecb[ee_entry_index].nfcee_id) &&
+                      nfa_hci_cb.se_apdu_gate_support) {
                 DLOG_IF(INFO, nfc_debug_enabled)
                   << StringPrintf("NFA_EE_STATUS_NTF received during INIT %x",nfa_ee_cb.ecb[ee_entry_index].nfcee_id);
                 nfa_hciu_add_host_resetting(nfa_ee_cb.ecb[ee_entry_index].nfcee_id, NFCEE_INIT_COMPLETED);
@@ -439,6 +429,10 @@ void nfa_hci_ee_info_cback(tNFA_EE_DISC_STS status) {
               }
               nfa_hci_release_transceive(nfa_ee_cb.ecb[ee_entry_index].nfcee_id,
                                          NFA_STATUS_HCI_UNRECOVERABLE_ERROR);
+              if (IS_PROP_EUICC_HOST(nfa_ee_cb.ecb[ee_entry_index].nfcee_id)) {
+                nfa_hciu_remove_all_pipes_from_host(
+                    nfa_ee_cb.ecb[ee_entry_index].nfcee_id);
+              }
               if (nfa_hciu_is_no_host_resetting()) {
                 nfa_hciu_add_host_resetting(
                     nfa_ee_cb.ecb[ee_entry_index].nfcee_id,
@@ -468,9 +462,7 @@ void nfa_hci_ee_info_cback(tNFA_EE_DISC_STS status) {
         for (int ee_entry_index = 0; ee_entry_index < NFA_HCI_MAX_HOST_IN_NETWORK; ee_entry_index++) {
             uint8_t nfceeid = nfa_hci_cb.ee_info[ee_entry_index].ee_handle & ~NFA_HANDLE_GROUP_EE;
             if (nfa_hci_cb.ee_info[ee_entry_index].ee_status ==
-                    NFA_EE_STATUS_REMOVED &&
-                (nfceeid == NFA_HCI_FIRST_PROP_HOST ||
-                 nfceeid == NFA_HCI_EUICC_HOST)) {
+                    NFA_EE_STATUS_REMOVED && (IS_PROP_HOST(nfceeid))) {
               if (!(nfa_hci_cb.hci_state == NFA_HCI_STATE_WAIT_NETWK_ENABLE ||
                     nfa_hci_cb.hci_state ==
                         NFA_HCI_STATE_RESTORE_NETWK_ENABLE ||
@@ -970,12 +962,13 @@ bool nfa_hci_enable_one_nfcee(void) {
             if (nfa_hci_cb.ee_info[xx].ee_status == NFA_EE_STATUS_INACTIVE ||
                     nfa_hci_cb.ee_info[xx].ee_status == NFA_EE_STATUS_ACTIVE ||
                     nfa_hci_cb.ee_info[xx].ee_status == NFA_EE_STATUS_REMOVED) {
-              if ((nfceeid != NFA_HCI_FIRST_PROP_HOST &&
-                   nfceeid != NFA_HCI_EUICC_HOST) &&
-                  nfa_hci_cb.ee_info[xx].ee_status == NFA_EE_STATUS_REMOVED) {
-                nfa_hci_cb.next_nfcee_idx = xx + 1;
-                continue;
-              }
+                if (nfceeid != NFA_HCI_FIRST_PROP_HOST) {
+                  tNFA_EE_ECB *p_cb = nfa_ee_find_ecb(nfceeid);
+                  if (p_cb != nullptr && p_cb->ee_status == NFA_EE_STATUS_REMOVED) {
+                    nfa_hci_cb.next_nfcee_idx = xx + 1;
+                    continue;
+                  }
+                }
                 if(nfa_hci_cb.ee_info[xx].hci_enable_state == NFA_HCI_FL_EE_ENABLED) {
                   if(nfa_hci_check_set_apdu_pipe_ready_for_next_host ()) {
                     nfa_hci_cb.next_nfcee_idx = xx + 1;
@@ -992,11 +985,8 @@ bool nfa_hci_enable_one_nfcee(void) {
                         if(nfa_dm_is_hci_supported()) {
                           nfa_hci_cb.ee_info[xx].hci_enable_state = NFA_HCI_FL_EE_ENABLED;
                           nfa_hciu_clear_host_resetting(nfceeid, NFCEE_REINIT);
-                          if (nfa_hciu_check_host_resetting(
-                                  nfceeid, NFCEE_UNRECOVERABLE_ERRROR)) {
-                            nfa_hciu_clear_host_resetting(
-                                nfceeid, NFCEE_UNRECOVERABLE_ERRROR);
-                          }
+                          nfa_hciu_check_n_clear_host_resetting(
+                              nfa_hci_cb.curr_nfcee, NFCEE_UNRECOVERABLE_ERRROR);
                           nfa_hci_cb.next_nfcee_idx = xx + 1;
                           continue;
                         }
@@ -1007,8 +997,7 @@ bool nfa_hci_enable_one_nfcee(void) {
                     {
                       if(nfcFL.eseFL._NCI_NFCEE_PWR_LINK_CMD)
                       {
-                        if (nfceeid == NFA_HCI_FIRST_PROP_HOST ||
-                            nfceeid == NFA_HCI_EUICC_HOST) {
+                        if (IS_PROP_HOST(nfceeid)) {
                           status = NFC_NfceePLConfig(nfceeid, 0x03);
                           if (status != NFA_STATUS_OK) {
                             LOG(ERROR) << StringPrintf(

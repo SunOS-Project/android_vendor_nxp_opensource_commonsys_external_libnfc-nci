@@ -69,7 +69,7 @@
 #define NXP_EN_PN557     1
 #define NXP_EN_SN300U    1
 #define NXP_ANDROID_VER (14U)        /* NXP android version */
-#define NFC_NXP_MW_VERSION_MAJ (0x05) /* MW Major Version */
+#define NFC_NXP_MW_VERSION_MAJ (0x08) /* MW Major Version */
 #define NFC_NXP_MW_VERSION_MIN (0x00) /* MW Minor Version */
 #define NFC_NXP_MW_CUSTOMER_ID (0x00) /* MW Customer Id */
 #define NFC_NXP_MW_RC_VERSION  (0x00) /* MW RC Version */
@@ -120,6 +120,7 @@
 #define NFC_STATUS_ACTIVATION_FAILED NCI_STATUS_ACTIVATION_FAILED
 /* Tear Down Error      */
 #define NFC_STATUS_TEAR_DOWN NCI_STATUS_TEAR_DOWN
+#define NFC_STATUS_RF_FRAME_CORRUPTED NCI_STATUS_RF_FRAME_CORRUPTED
 /* RF transmission error*/
 #define NFC_STATUS_RF_TRANSMISSION_ERR NCI_STATUS_RF_TRANSMISSION_ERR
 /* RF protocol error    */
@@ -190,6 +191,8 @@ typedef uint8_t tNFC_STATUS;
 #define NXP_NFC_ESE_CONN_PIPE_STATUS  ((unsigned char)0x22)
 #define NXP_NFC_ESE_APDU_PIPE_STATUS  ((unsigned char)0x23)
 #define NXP_NFC_EUICC_APDU_PIPE_STATUS ((unsigned char)0x12)
+#define NXP_NFC_EUICC1_CONN_PIPE_STATUS ((unsigned char)0x76)
+#define NXP_NFC_EUICC2_CONN_PIPE_STATUS ((unsigned char)0x77)
 /**********************************************
  * NFC Config Parameter IDs defined by NXP NFC
  **********************************************/
