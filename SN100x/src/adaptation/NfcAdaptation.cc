@@ -873,7 +873,7 @@ void NfcAdaptation::InitializeHalDeviceContext() {
       mHal = mHal_1_1 = mHal_1_2 = nullptr;
       LOG(INFO) << StringPrintf("%s: INfcAidl::fromBinder returned", func);
     }
-    LOG_FATAL_IF(mAidlHal == nullptr, "Failed to retrieve the NFC AIDL!");
+    LOG_ALWAYS_FATAL_IF(mAidlHal == nullptr, "Failed to retrieve the NFC AIDL!");
   } else {
     LOG(INFO) << StringPrintf("%s: INfc::getService() returned %p (%s)", func,
                               mHal.get(),
@@ -1424,6 +1424,11 @@ void NfcAdaptation::HalDownloadFirmwareCallback(nfc_event_t event,
           fw_dl_status = event_status;
         }
       }
+      break;
+    case HAL_HCI_NETWORK_RESET:
+      DLOG_IF(INFO, nfc_debug_enabled)
+          << StringPrintf("%s: HAL_HCI_NETWORK_RESET", func);
+      delete_stack_non_volatile_store(true);
       break;
 #endif
     case HAL_NFC_OPEN_CPLT_EVT: {

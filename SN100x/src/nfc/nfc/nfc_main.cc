@@ -38,7 +38,7 @@
  *
  *  Changes from Qualcomm Innovation Center are provided under the following license:
  *
- *  Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ *  Copyright (c) 2022,2024 Qualcomm Innovation Center, Inc. All rights reserved.
  *  SPDX-License-Identifier: BSD-3-Clause-Clear
  *
  ******************************************************************************/
@@ -73,10 +73,6 @@
 #endif
 #if (NFC_RW_ONLY == FALSE)
 
-#include "llcp_int.h"
-
-
-
 /* NFC mandates support for at least one logical connection;
  * Update max_conn to the NFCC capability on InitRsp */
 #if (NXP_EXTNS == TRUE)
@@ -91,7 +87,6 @@
 
 #else /* NFC_RW_ONLY */
 #define ce_init()
-#define llcp_init()
 
 #define NFC_SET_MAX_CONN_DEFAULT()
 
@@ -320,7 +315,7 @@ void nfc_enabled(tNFC_STATUS nfc_status, NFC_HDR* p_init_rsp_msg) {
     nfc_cb.nci_ctrl_size = *p++; /* Max Control Packet Payload Length */
     p_cb->init_credits = p_cb->num_buff = 0;
     nfc_set_conn_id(p_cb, NFC_RF_CONN_ID);
-    if (nfc_cb.nci_version == NCI_VERSION_2_0) {
+    if (nfc_cb.nci_version >= NCI_VERSION_2_0) {
       /* one byte is consumed in the top expression and
        * 3 bytes from uit16+uint8 below */
       lremain -= 4;
@@ -937,7 +932,6 @@ void NFC_Init(tHAL_NFC_ENTRY* p_hal_entry_tbl) {
   GKI_init_timer_list(&nfc_cb.quick_timer_queue);
   rw_init();
   ce_init();
-  llcp_init();
 #if(NXP_EXTNS == TRUE)
   }
 #endif

@@ -40,11 +40,10 @@ cc_library_static {
     shared_libs: [
         "libbase",
     ],
-    sanitize: {
-        cfi: true,
-        misc_undefined: ["signed-integer-overflow",
-                         "unsigned-integer-overflow"],
-    },
+    apex_available: [
+         "//apex_available:platform",
+         "com.android.nfcservices"
+    ],
 }
 
 cc_test {
