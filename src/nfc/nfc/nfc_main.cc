@@ -599,7 +599,7 @@ void nfc_main_handle_hal_evt(tNFC_HAL_EVT_MSG* p_msg) {
           }
           break;
         case HAL_NFC_STATUS_FAILED:
-          DLOG_IF(INFO, nfc_debug_enabled) << StringPrintf("%s; TZ HAL event to switch OFF NFC", __func__);
+          LOG(ERROR) << StringPrintf("%s; TZ HAL event to switch OFF NFC", __func__);
           nfc_ncif_event_status(NFC_TZ_SECURE_ZONE_DISABLE_NFC_REVT, HAL_NFC_STATUS_FAILED); /* must trig NFA_DM_TZ_SECURE_ZONE_DISABLE_NFC_EVT */
           break;
 #if (NXP_EXTNS == FALSE)

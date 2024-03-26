@@ -35,7 +35,7 @@ cc_library {
         // Added for Memory leak trace
         "libsn100nfcutils",
 	"nqlibstatslog_nfc",
-        "libnfc-nci_flags",
+        "libnfc-nqnci_flags",
     ],
     cflags: [
         "-DDYN_ALLOC=1",
@@ -95,7 +95,7 @@ cc_library {
     stl: "libc++_static",
     apex_available: [
          "//apex_available:platform",
-	 "com.android.nfcservices"
+	 "com.android.nqnfcservices"
     ],
 }
 cc_defaults {
@@ -108,7 +108,7 @@ cc_defaults {
         "libbase",
     ],
     shared_libs: [
-	"libnfc-nci_flags",
+	"libnfc-nqnci_flags",
     ],
     cflags: [
         "-DBUILDCFG=1",
@@ -177,7 +177,7 @@ cc_library {
     },
     apex_available: [
          "//apex_available:platform",
-	 "com.android.nfcservices"
+	 "com.android.nqnfcservices"
     ],
 }
 

@@ -1,5 +1,5 @@
 [package]
-name = "casimir"
+name = "nq_casimir"
 version = "0.1.0"
 edition = "2021"
 

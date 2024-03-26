@@ -1,4 +1,4 @@
-package: "com.android.nfc.nci.flags"
+package: "com.android.nqnfc.nci.flags"
 
 flag {
     name: "t5t_no_getsysinfo"
