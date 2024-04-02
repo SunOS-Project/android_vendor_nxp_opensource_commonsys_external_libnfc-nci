@@ -95,7 +95,7 @@ cc_library {
     stl: "libc++_static",
     apex_available: [
          "//apex_available:platform",
-	 "com.android.nqnfcservices"
+	 "com.android.nfcservices"
     ],
 }
 cc_defaults {
@@ -177,7 +177,7 @@ cc_library {
     },
     apex_available: [
          "//apex_available:platform",
-	 "com.android.nqnfcservices"
+	 "com.android.nfcservices"
     ],
 }
 
