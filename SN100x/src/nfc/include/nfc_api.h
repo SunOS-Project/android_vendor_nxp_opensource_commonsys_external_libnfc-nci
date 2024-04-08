@@ -68,8 +68,8 @@
 #define NXP_EN_PN560     1
 #define NXP_EN_PN557     1
 #define NXP_EN_SN300U    1
-#define NXP_ANDROID_VER (14U)        /* NXP android version */
-#define NFC_NXP_MW_VERSION_MAJ (0x08) /* MW Major Version */
+#define NXP_ANDROID_VER (15U)        /* NXP android version */
+#define NFC_NXP_MW_VERSION_MAJ (0x02) /* MW Major Version */
 #define NFC_NXP_MW_VERSION_MIN (0x00) /* MW Minor Version */
 #define NFC_NXP_MW_CUSTOMER_ID (0x00) /* MW Customer Id */
 #define NFC_NXP_MW_RC_VERSION  (0x00) /* MW RC Version */
@@ -438,6 +438,14 @@ typedef struct {
 #define NFC_NFCEE_STS_INIT_COMPLETED             NCI_NFCEE_STS_INIT_COMPLETED
 #define NFC_NFCEE_STS_PMUVCC_OFF                 NCI_NFCEE_STS_PMUVCC_OFF
 #define NFC_NFCEE_STS_PROP_UNRECOVERABLE_ERROR   NCI_NFCEE_STS_PROP_NONE
+
+/*EE TYPE*/
+typedef enum {
+  NFC_EE_TYPE_NONE = 0,
+  NFC_EE_TYPE_ESE,
+  NFC_EE_TYPE_EUICC,
+  NFC_EE_TYPE_EUICC_WITH_APDUPIPE19,
+} nfc_ee_type_t;
 #endif
 
 /* NFCEE connected and inactive */
@@ -541,7 +549,7 @@ extern uint8_t NFC_GetNCIVersion();
 /* Type5Tag    - NFC-V/ISO15693*/
 #define NFC_PROTOCOL_T5T NFC_PROTOCOL_T5T_(NFC_GetNCIVersion())
 #define NFC_PROTOCOL_T5T_(x) \
-  (((x) == NCI_VERSION_2_0) ? NCI_PROTOCOL_T5T : NCI_PROTOCOL_15693)
+  (((x) >= NCI_VERSION_2_0) ? NCI_PROTOCOL_T5T : NCI_PROTOCOL_15693)
 /* Type 4A,4B  - NFC-A or NFC-B   */
 #define NFC_PROTOCOL_ISO_DEP NCI_PROTOCOL_ISO_DEP
 /* NFCDEP/LLCP - NFC-A or NFC-F       */
