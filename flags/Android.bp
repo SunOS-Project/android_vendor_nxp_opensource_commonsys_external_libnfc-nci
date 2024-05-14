@@ -2,6 +2,7 @@
 aconfig_declarations {
     name: "aconfig_system_nqnfc",
     package: "com.android.nqnfc.nci.flags",
+    container: "system",
     srcs: ["flags.aconfig"],
 }
 
