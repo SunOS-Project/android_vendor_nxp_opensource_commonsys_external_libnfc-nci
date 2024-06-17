@@ -1,4 +1,4 @@
-package: "com.android.nqnfc.nci.flags"
+package: "com.android.nfc.nci.nqflags"
 container: "system"
 
 flag {

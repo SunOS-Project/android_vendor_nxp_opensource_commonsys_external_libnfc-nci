@@ -1,14 +1,14 @@
 // NFC Flag definitions
 aconfig_declarations {
     name: "aconfig_system_nqnfc",
-    package: "com.android.nqnfc.nci.flags",
+    package: "com.android.nfc.nci.nqflags",
     container: "system",
     srcs: ["flags.aconfig"],
 }
 
 cc_aconfig_library {
     name: "libnfc-nqnci_flags",
-    aconfig_declarations: "aconfig_system_nfc",
+    aconfig_declarations: "aconfig_system_nqnfc",
     host_supported: true,
     apex_available: [
         "//apex_available:platform",

@@ -43,7 +43,7 @@
  ******************************************************************************/
 #include <android-base/logging.h>
 #include <android-base/stringprintf.h>
-#include <com_android_nfc_nci_flags.h>
+#include <com_android_nfc_nci_nqflags.h>
 #include <log/log.h>
 #include <string.h>
 
@@ -55,7 +55,7 @@
 #include "rw_int.h"
 
 using android::base::StringPrintf;
-using com::android::nfc::nci::flags::t5t_no_getsysinfo;
+using com::android::nfc::nci::nqflags::t5t_no_getsysinfo;
 extern unsigned char appl_dta_mode_flag;
 
 /* Response timeout     */
