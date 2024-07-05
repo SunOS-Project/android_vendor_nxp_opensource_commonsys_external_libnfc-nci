@@ -34,7 +34,7 @@ cc_library {
         "android.hardware.nfc-V1-ndk",
         // Added for Memory leak trace
         "libsn100nfcutils",
-	"nqlibstatslog_nfc",
+        "nqlibstatslog_nfc",
         "libnfc-nqnci_flags",
     ],
     cflags: [
@@ -102,7 +102,7 @@ cc_defaults {
     name: "nqnfc_fuzzer_defaults",
     native_coverage: true,
     static_libs: [
-        "libnfcutils",
+        "libsn100nfcutils",
         "libcutils",
         "liblog",
         "libbase",
@@ -154,9 +154,9 @@ cc_defaults {
 cc_library {
     name: "nqlibstatslog_nfc",
     host_supported: true,
-    generated_sources: ["statslog_nfc.cpp"],
-    generated_headers: ["statslog_nfc.h"],
-    export_generated_headers: ["statslog_nfc.h"],
+    generated_sources: ["nqstatslog_nfc.cpp"],
+    generated_headers: ["nqstatslog_nfc.h"],
+    export_generated_headers: ["nqstatslog_nfc.h"],
     target: {
         android: {
             shared_libs: [
@@ -215,7 +215,7 @@ cc_fuzz {
         "fuzzers/nci/*.cc",
     ],
     shared_libs: [
-        "libstatslog_nfc",
+        "nqlibstatslog_nfc",
     ]
 }
 

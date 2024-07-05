@@ -41,7 +41,7 @@
  ******************************************************************************/
 #include <android-base/logging.h>
 #include <android-base/stringprintf.h>
-#include <statslog_nfc.h>
+#include <nqstatslog_nfc.h>
 #include <string.h>
 
 #include "include/debug_lmrt.h"

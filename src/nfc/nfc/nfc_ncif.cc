@@ -46,7 +46,7 @@
 #include <android-base/stringprintf.h>
 #include <fcntl.h>
 #include <log/log.h>
-#include <statslog_nfc.h>
+#include <nqstatslog_nfc.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 
