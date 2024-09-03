@@ -1,11 +1,20 @@
+package {
+    default_team: "trendy_team_fwk_nfc",
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "system_nfc_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["system_nfc_license"],
+}
+
 cc_library {
     arch: {
         arm: {
             instruction_set: "arm",
         },
     },
-    name: "libsn100nfc-nci",
-    system_ext_specific: true,
+    name: "libnfc-nci",
     shared_libs: [
         "libcutils",
         "liblog",
@@ -18,23 +27,23 @@ cc_library {
         "libbinder",
         "libbinder_ndk",
         "libstatssocket",
-	"libmemunreachable",
+        "libmemunreachable",
         "server_configurable_flags",
+    ],
+    defaults: [
+        "aconfig_lib_cc_shared_link.defaults",
     ],
     static_libs: [
         "android.hardware.nfc@1.0",
         "android.hardware.nfc@1.1",
         "android.hardware.nfc@1.2",
-        "vendor.nxp.hardware.nfc@1.0",
-        "vendor.nxp.hardware.nfc@1.1",
-        "vendor.nxp.hardware.nfc@2.0",
         "vendor.nxp.nxpnfc@2.0",
         "vendor.nxp.nxpnfc_aidl-V1-ndk",
         // Add for AIDL
         "android.hardware.nfc-V1-ndk",
         // Added for Memory leak trace
-        "libsn100nfcutils",
-        "nqlibstatslog_nfc",
+        "libnfcutils",
+	"nqlibstatslog_nfc",
         "libnfc-nqnci_flags",
     ],
     cflags: [
@@ -82,7 +91,6 @@ cc_library {
         },
     },
     sanitize: {
-        cfi: true,
         misc_undefined: ["bounds"],
         integer_overflow: true,
         scs: true,
@@ -95,14 +103,14 @@ cc_library {
     stl: "libc++_static",
     apex_available: [
          "//apex_available:platform",
-	 "com.android.nfcservices"
+         "com.android.nfcservices",
     ],
 }
 cc_defaults {
     name: "nqnfc_fuzzer_defaults",
     native_coverage: true,
     static_libs: [
-        "libsn100nfcutils",
+        "libnfcutils",
         "libcutils",
         "liblog",
         "libbase",
@@ -122,7 +130,7 @@ cc_defaults {
     product_variables: {
         debuggable: {
             cflags: [
-                "-DDCHECK_ALWAYS_ON"
+                "-DDCHECK_ALWAYS_ON",
             ],
         },
     },
@@ -141,7 +149,7 @@ cc_defaults {
         "fuzzers/inc",
     ],
     fuzz_config: {
-       cc: [
+        cc: [
             "android-security-assurance-redteam@google.com",
             "zachoverflow@google.com",
             "jackcwyu@google.com",
@@ -155,20 +163,15 @@ cc_library {
     name: "nqlibstatslog_nfc",
     host_supported: true,
     generated_sources: ["nqstatslog_nfc.cpp"],
-    generated_headers: ["nqstatslog_nfc.h"],
+    generated_headers: ["nwstatslog_nfc.h"],
     export_generated_headers: ["nqstatslog_nfc.h"],
+    shared_libs: [
+        "libstatssocket",
+    ],
     target: {
-        android: {
-            shared_libs: [
-                "libstatssocket",
-            ],
-        },
         host: {
             static_libs: [
                 "libbase",
-            ],
-            shared_libs: [
-                "libstatssocket",
             ],
         },
         darwin: {
@@ -177,7 +180,7 @@ cc_library {
     },
     apex_available: [
          "//apex_available:platform",
-	 "com.android.nfcservices"
+         "com.android.nfcservices",
     ],
 }
 
@@ -203,7 +206,7 @@ cc_fuzz {
     name: "nqnfc_nci_fuzzer",
     defaults: ["nfc_fuzzer_defaults"],
     fuzzing_frameworks: {
-      afl: false,
+        afl: false,
     },
     srcs: [
         "nfc/nci/*.cc",
@@ -216,14 +219,14 @@ cc_fuzz {
     ],
     shared_libs: [
         "nqlibstatslog_nfc",
-    ]
+    ],
 }
 
 cc_fuzz {
     name: "nqnfc_rw_fuzzer",
     defaults: ["nfc_fuzzer_defaults"],
     fuzzing_frameworks: {
-      afl: false,
+        afl: false,
     },
     srcs: [
         "nfc/tags/rw_*.cc",
@@ -236,10 +239,10 @@ cc_fuzz {
 }
 
 cc_fuzz {
-    name: "nqnfc_ce_fuzzer",
+    name: "nfc_ce_fuzzer",
     defaults: ["nfc_fuzzer_defaults"],
     fuzzing_frameworks: {
-      afl: false,
+        afl: false,
     },
     srcs: [
         "nfc/tags/ce_*.cc",
@@ -255,7 +258,7 @@ cc_fuzz {
     name: "nqnfc_ndef_fuzzer",
     defaults: ["nfc_fuzzer_defaults"],
     fuzzing_frameworks: {
-      afl: false,
+        afl: false,
     },
     srcs: [
         "nfa/dm/nfa_dm_ndef.cc",
@@ -283,7 +286,7 @@ cc_fuzz {
     name: "nqnfc_integration_fuzzer",
     defaults: ["nfc_fuzzer_defaults"],
     fuzzing_frameworks: {
-      afl: false,
+        afl: false,
     },
     srcs: [
         "adaptation/debug_nfcsnoop.cc",
@@ -318,5 +321,5 @@ cc_fuzz {
         "libprotobuf-cpp-full",
         "nqlibstatslog_nfc",
         "libz",
-    ]
+    ],
 }
