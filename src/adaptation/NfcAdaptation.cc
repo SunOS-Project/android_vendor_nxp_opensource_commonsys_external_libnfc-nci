@@ -52,7 +52,8 @@
 #if (NXP_EXTNS == TRUE)
 #include <hidl/LegacySupport.h>
 #include <memunreachable/memunreachable.h>
-#include <vendor/nxp/nxpnfc/2.0/INqNfc.h>
+#include <vendor/nxp/hardware/nfc/2.0/INqNfc.h>
+#include <hidl/LegacySupport.h>
 #include <aidl/vendor/nxp/nxpnfc_aidl/INxpNfc.h>
 #endif
 #include "nfa_api.h"
@@ -98,12 +99,12 @@ std::string NFC_AIDL_HAL_SERVICE_NAME = "android.hardware.nfc.INfc/default";
 std::string NXPNFC_AIDL_HAL_SERVICE_NAME =
     "vendor.nxp.nxpnfc_aidl.INxpNfc/default";
 using android::hardware::configureRpcThreadpool;
-using INqNfc = vendor::nxp::nxpnfc::V2_0::INqNfc;
+using INqNfc = vendor::nxp::hardware::nfc::V2_0::INqNfc;
 using INxpNfcAidl = ::aidl::vendor::nxp::nxpnfc_aidl::INxpNfc;
 using ::android::hardware::nfc::V1_0::NfcStatus;
 
 ThreadMutex NfcAdaptation::sIoctlLock;
-sp<INqNfc> NfcAdaptation::mHalNqNfc;
+sp<INqNfc> NfcAdaptation::mNqHal_2_0;
 std::shared_ptr<INxpNfcAidl> NfcAdaptation::mAidlHalNxpNfc;
 #endif
 
@@ -764,7 +765,7 @@ uint32_t NfcAdaptation::NFCA_TASK(__attribute__((unused)) uint32_t arg) {
 *******************************************************************************/
 uint32_t NfcAdaptation::Thread(__attribute__((unused)) uint32_t arg) {
   const char* func = "NfcAdaptation::Thread";
-  LOG(DEBUG) << StringPrintf("%s: enter", func);
+  LOG(VERBOSE) << StringPrintf("%s: enter", func);
 
   {
     ThreadCondVar CondVar;
@@ -811,14 +812,14 @@ void NfcAdaptation::InitializeAidlHalContext() {
   mAidlHalNxpNfc = INxpNfcAidl::fromBinder(binder);
   if (mAidlHalNxpNfc == nullptr) {
     LOG(INFO) << StringPrintf("%s: HIDL INxpNfc::tryGetService()", func);
-    mHalNqNfc = INqNfc::tryGetService();
-    if (mHalNqNfc != nullptr) {
-      LOG(VERBOSE) << StringPrintf("%s: INqNfc::getService() returned %p (%s)",
-                                 func, mHalNqNfc.get(),
-                                 (mHalNqNfc->isRemote() ? "remote" : "local"));
+    mNqHal_2_0 = INqNfc::tryGetService();
+    if (mNqHal_2_0 != nullptr) {
+      LOG(VERBOSE) << StringPrintf(
+          "%s: INqNfc::getService() returned %p (%s)", func, mNqHal_2_0.get(),
+          (mNqHal_2_0->isRemote() ? "remote" : "local"));
     }
   } else {
-    mHalNqNfc = nullptr;
+    mNqHal_2_0 = nullptr;
     LOG(INFO) << StringPrintf("%s: INxpNfcAidl::fromBinder returned", func);
     LOG_FATAL_IF(mAidlHalNxpNfc == nullptr,
                  "Failed to retrieve the NXPNFC AIDL!");
@@ -1038,15 +1039,15 @@ string NfcAdaptation::HalGetProperty(string key) {
 
   if (mAidlHalNxpNfc != nullptr) {
     mAidlHalNxpNfc->getVendorParam(key, &value);
-  } else if (mHalNqNfc != NULL) {
+  } else if (mNqHal_2_0 != NULL) {
     /* Synchronous HIDL call, will be returned only after
      * HalGetProperty_cb() is called from HAL*/
-    mHalNqNfc->getVendorParam(key, HalGetProperty_cb);
+    mNqHal_2_0->getVendorParam(key, HalGetProperty_cb);
     value = propVal;    /* Copy the string received from HAL */
     propVal.assign(""); /* Clear the global string variable  */
   } else {
-    LOG(VERBOSE) << StringPrintf("%s: mHalNqNfc and mAidlHalNxpNfc is NULL",
-                               __func__);
+    LOG(VERBOSE)
+        << StringPrintf("%s: mNqHal_2_0 and mAidlHalNxpNfc is NULL", __func__);
   }
 
   return value;
@@ -1067,11 +1068,11 @@ bool NfcAdaptation::HalSetProperty(string key, string value) {
   bool status = false;
   if (mAidlHalNxpNfc != nullptr) {
     mAidlHalNxpNfc->setVendorParam(key, value, &status);
-  } else if (mHalNqNfc != NULL) {
-    status = mHalNqNfc->setVendorParam(key, value);
+  } else if (mNqHal_2_0 != NULL) {
+    status = mNqHal_2_0->setVendorParam(key, value);
   } else {
-    LOG(VERBOSE) << StringPrintf("%s: mHalNqNfc and mAidlHalNxpNfc is NULL",
-                               __func__);
+    LOG(VERBOSE)
+        << StringPrintf("%s: mNqHal_2_0 and mAidlHalNxpNfc is NULL", __func__);
   }
   return status;
 }
@@ -1092,11 +1093,11 @@ bool NfcAdaptation::HalSetTransitConfig(char * strval) {
   bool status = false;
   if (mAidlHalNxpNfc != nullptr) {
     mAidlHalNxpNfc->setNxpTransitConfig(strval, &status);
-  } else if (mHalNqNfc != NULL) {
-    status = mHalNqNfc->setNxpTransitConfig(strval);
+  } else if (mNqHal_2_0 != NULL) {
+    status = mNqHal_2_0->setNxpTransitConfig(strval);
   } else {
-    LOG(VERBOSE) << StringPrintf("%s: mHalNqNfc and mAidlHalNxpNfc is NULL",
-                               __func__);
+    LOG(VERBOSE)
+        << StringPrintf("%s: mHalNxpNfc and mAidlHalNxpNfc is NULL", __func__);
   }
   return status;
 }
@@ -1131,13 +1132,13 @@ bool NfcAdaptation::resetEse(uint64_t level) {
     } else {
       ALOGE("NfcAdaptation::resetEse mAidlHalNxpNfc failed");
     }
-  } else if (mHalNqNfc != nullptr) {
-    ret = mHalNqNfc->resetEse(level);
+  } else if (mNqHal_2_0 != nullptr) {
+    ret = mNqHal_2_0->resetEse(level);
     if (ret) {
       LOG(VERBOSE) << StringPrintf(
-          "NfcAdaptation::resetEse mHalNqNfc completed");
+"NfcAdaptation::resetEse mNqHal_2_0 completed");
     } else {
-      ALOGE("NfcAdaptation::resetEse mHalNqNfc failed");
+      ALOGE("NfcAdaptation::resetEse mNqHal_2_0 failed");
     }
   }
 
